@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="list-group">
+                    <a href="{% url 'admin:index' %}" class="list-group-item list-group-item-action">Dashboard</a>
+                    <a href="{% url 'admin:auth_user_changelist' %}" class="list-group-item list-group-item-action">Usuários</a>
+                    <a href="{% url 'admin:cars_car_changelist' %}" class="list-group-item list-group-item-action">Carros</a>
+                    <a href="{% url 'admin:cars_category_changelist' %}" class="list-group-item list-group-item-action">Categorias</a>
+                    <a href="{% url 'admin:cars_order_changelist' %}" class="list-group-item list-group-item-action">Pedidos</a>
+                    <a href="{% url 'admin:core_userprofile_changelist' %}" class="list-group-item list-group-item-action {% if not has_userprofile %}disabled{% endif %}">Perfis</a>
+                    <a href="{% url 'admin:core_siteconfig_changelist' %}" class="list-group-item list-group-item-action {% if not has_siteconfig %}disabled{% endif %}">Configurações</a>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Painel de Administração</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-4">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total de Carros</h5>
+                                        <p class="card-text display-4">{{ car_count }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total de Usuários</h5>
+                                        <p class="card-text display-4">{{ user_count }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total de Pedidos</h5>
+                                        <p class="card-text display-4">{{ order_count }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'admin:index' %}" class="btn btn-dark">Acessar Admin Completo</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

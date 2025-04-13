@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card car-detail-card">
+                <!-- Cabeçalho com informações principais -->
+                <div class="card-header bg-dark text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-0">{{ car.make }} {{ car.model }}</h2>
+                            <div class="d-flex flex-wrap mt-2">
+                                <span class="badge bg-primary me-2 mb-1">{{ car.year }}</span>
+                                <span class="badge bg-success me-2 mb-1">{{ car.get_fuel_type_display }}</span>
+                                <span class="badge bg-info me-2 mb-1">{{ car.get_transmission_display }}</span>
+                                <span class="badge bg-warning text-dark mb-1">{{ car.mileage }} km</span>
+                            </div>
+                        </div>
+                        <span class="price-tag">R$ {{ car.price|floatformat:2 }}</span>
+                    </div>
+                </div>
+
+                <!-- Corpo do card -->
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Coluna da imagem -->
+                        <div class="col-md-6 mb-4 mb-md-0">
+                            <div class="car-image-container">
+                                {% if car.image %}
+                                <img src="{{ car.image.url }}" alt="{{ car.make }} {{ car.model }}" 
+                                     class="img-fluid rounded main-car-image">
+                                {% else %}
+                                <div class="no-image-placeholder">
+                                    <i class="fas fa-car fa-5x text-muted"></i>
+                                    <p class="mt-2">Imagem não disponível</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Coluna dos detalhes -->
+                        <div class="col-md-6">
+                            <div class="car-specs">
+                                <h4 class="specs-title">Especificações</h4>
+                                <ul class="list-group list-group-flush specs-list">
+                                    <li class="list-group-item">
+                                        <i class="fas fa-palette me-2"></i>
+                                        <strong>Cor:</strong> {{ car.color }}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-gas-pump me-2"></i>
+                                        <strong>Combustível:</strong> {{ car.get_fuel_type_display }}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-cog me-2"></i>
+                                        <strong>Câmbio:</strong> {{ car.get_transmission_display }}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-tachometer-alt me-2"></i>
+                                        <strong>Quilometragem:</strong> {{ car.mileage }} km
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-calendar-alt me-2"></i>
+                                        <strong>Ano:</strong> {{ car.year }}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-tag me-2"></i>
+                                        <strong>Categoria:</strong> {{ car.category }}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Disponibilidade:</strong> 
+                                        {% if car.available %}
+                                            <span class="text-success">Disponível</span>
+                                        {% else %}
+                                            <span class="text-danger">Vendido</span>
+                                        {% endif %}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Descrição -->
+                    <div class="mt-4 car-description">
+                        <h4><i class="fas fa-align-left me-2"></i>Descrição</h4>
+                        <div class="description-content">
+                            {{ car.description|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rodapé do card -->
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            Anúncio criado em: {{ car.created_at|date:"d/m/Y H:i" }}
+                            {% if car.updated_at != car.created_at %}
+                                <br><i class="fas fa-sync-alt me-1"></i>
+                                Atualizado em: {{ car.updated_at|date:"d/m/Y H:i" }}
+                            {% endif %}
+                        </small>
+                        <a href="{% url 'cars:car_list' %}" class="btn btn-outline-dark">
+                            <i class="fas fa-chevron-left me-1"></i> Voltar para lista
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .car-detail-card {
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    
+    .price-tag {
+        background: #fff;
+        color: #000;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 1.2rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .car-image-container {
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .main-car-image {
+        max-height: 100%;
+        width: auto;
+        object-fit: contain;
+    }
+    
+    .no-image-placeholder {
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .specs-title {
+        border-bottom: 2px solid #dee2e6;
+        padding-bottom: 8px;
+        margin-bottom: 15px;
+    }
+    
+    .specs-list .list-group-item {
+        border-left: none;
+        border-right: none;
+        padding: 12px 0;
+    }
+    
+    .car-description {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+    }
+    
+    .description-content {
+        white-space: pre-line;
+    }
+    
+    @media (max-width: 768px) {
+        .car-image-container {
+            height: 250px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Font Awesome para ícones -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}

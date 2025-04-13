@@ -1,0 +1,31 @@
+{% extends "base.html" %}  
+
+{% block title %}Todos os Carros{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Nossa Frota</h1>
+    
+    <div class="row">
+        {% for car in cars %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <img src="{{ car.image.url }}" class="card-img-top" alt="{{ car.make }} {{ car.model }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ car.year }} {{ car.make }} {{ car.model }}</h5>
+                    <p class="card-text">
+                        <strong>Preço:</strong> R$ {{ car.price }}<br>
+                        <strong>Quilometragem:</strong> {{ car.mileage }} km<br>
+                        <strong>Transmissão:</strong> {{ car.get_transmission_display }}
+                    </p>
+                    <a href="{% url 'cars:car_detail' car.pk %}" class="btn btn-primary">Ver Detalhes</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">Nenhum carro disponível no momento.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
