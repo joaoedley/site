@@ -6,6 +6,7 @@ from .models import Car, Category, Order
 from .forms import SearchForm
 from django.db import models
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 
 class CarListView(ListView):
     model = Car
@@ -87,15 +88,85 @@ def add_to_cart(request, car_id):
 
 @login_required
 def view_cart(request):
+    if not request.user.is_authenticated:
+        messages.warning(request, "Você precisa fazer login para acessar seu carrinho")
+        return redirect('login')  # Assumindo que você tem uma URL de login
+    
+    # Obtém todos os pedidos não finalizados do usuário
     orders = Order.objects.filter(user=request.user, completed=False)
+    
+    if not orders.exists():
+        return render(request, 'cars/cart.html', {'empty_cart': True})
+    
+    # Calcula o total considerando a quantidade de cada item
     total = sum(order.total_price() for order in orders)
-    return render(request, 'cars/cart.html', {'orders': orders, 'total': total})
+    
+    context = {
+        'orders': orders,  # Todos os itens do carrinho
+        'total': total,
+        'items_count': orders.aggregate(total_items=Sum('quantity'))['total_items'] or 0
+    }
+    return render(request, 'cars/cart.html', context)
+    
+
+
 
 @login_required
 def remove_from_cart(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-    order.delete()
-    messages.success(request, "Item removido do carrinho!")
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        order = Order.objects.get(id=order_id, user=request.user, completed=False)
+        order.delete()
+        messages.success(request, "Item removido do carrinho com sucesso")
+    except Order.DoesNotExist:
+        messages.error(request, "Item não encontrado no seu carrinho")
+    
+    return redirect('cars:view_cart')
+
+def update_quantity(request, order_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    if request.method == 'POST':
+        try:
+            quantity = int(request.POST.get('quantity', 1))
+            order = Order.objects.get(id=order_id, user=request.user, completed=False)
+            
+            if quantity > 0:
+                order.quantity = quantity
+                order.save()
+                messages.success(request, "Quantidade atualizada com sucesso")
+            else:
+                order.delete()
+                messages.success(request, "Item removido do carrinho")
+                
+        except (Order.DoesNotExist, ValueError):
+            messages.error(request, "Erro ao atualizar quantidade")
+    
+    return redirect('cars:view_cart')
+
+def update_quantity(request, order_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    if request.method == 'POST':
+        try:
+            quantity = int(request.POST.get('quantity', 1))
+            order = Order.objects.get(id=order_id, user=request.user, completed=False)
+            
+            if quantity > 0:
+                order.quantity = quantity
+                order.save()
+                messages.success(request, "Quantidade atualizada com sucesso")
+            else:
+                order.delete()
+                messages.success(request, "Item removido do carrinho")
+                
+        except (Order.DoesNotExist, ValueError):
+            messages.error(request, "Erro ao atualizar quantidade")
+    
     return redirect('cars:view_cart')
 
 @login_required

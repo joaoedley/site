@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Meu Carrinho - CarroSite{% endblock %}
+
+{% block content %}
+<div class="container my-3 my-md-5">
+    <h1 class="mb-3 mb-md-4">Meu Carrinho</h1>
+    
+    {% if empty_cart %}
+        <div class="alert alert-info text-center py-4">
+            <i class="bi bi-cart-x fs-1"></i>
+            <h3 class="mt-3">Seu carrinho está vazio</h3>
+            <a href="{% url 'cars:car_list' %}" class="btn btn-primary mt-3">
+                <i class="bi bi-arrow-left"></i> Ver Carros Disponíveis
+            </a>
+        </div>
+    {% else %}
+        <!-- Versão Desktop (table) -->
+        <div class="d-none d-md-block">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Veículo</th>
+                            <th>Quantidade</th>
+                            <th>Preço Unitário</th>
+                            <th>Subtotal</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if order.car.image %}
+                                    <img src="{{ order.car.image.url }}" alt="{{ order.car.make }} {{ order.car.model }}" 
+                                         class="img-thumbnail me-3" style="width: 100px; height: auto;">
+                                    {% endif %}
+                                    <div>
+                                        <h5 class="mb-1">{{ order.car.year }} {{ order.car.make }} {{ order.car.model }}</h5>
+                                        <small class="text-muted">
+                                            {{ order.car.mileage }} km • {{ order.car.get_fuel_type_display }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="align-middle">
+                                <form method="post" action="{% url 'cars:update_quantity' order.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="number" name="quantity" value="{{ order.quantity }}" min="1" 
+                                           class="form-control form-control-sm" style="width: 70px;" 
+                                           onchange="this.form.submit()">
+                                </form>
+                            </td>
+                            <td class="align-middle">R$ {{ order.car.price|floatformat:2 }}</td>
+                            <td class="align-middle">R$ {{ order.total_price|floatformat:2 }}</td>
+                            <td class="align-middle">
+                                <a href="{% url 'cars:remove_from_cart' order.id %}" 
+                                   class="btn btn-outline-danger btn-sm"
+                                   onclick="return confirm('Tem certeza que deseja remover este item?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Versão Mobile (cards) -->
+        <div class="d-md-none">
+            {% for order in orders %}
+            <div class="card mb-3 shadow-sm">
+                <div class="row g-0">
+                    <div class="col-4">
+                        {% if order.car.image %}
+                        <img src="{{ order.car.image.url }}" class="img-fluid rounded-start h-100" 
+                             alt="{{ order.car.make }} {{ order.car.model }}" 
+                             style="object-fit: cover; min-height: 120px;">
+                        {% endif %}
+                    </div>
+                    <div class="col-8">
+                        <div class="card-body py-2">
+                            <h5 class="card-title mb-1">{{ order.car.year }} {{ order.car.make }} {{ order.car.model }}</h5>
+                            <p class="card-text text-muted small mb-1">
+                                {{ order.car.mileage }} km • {{ order.car.get_fuel_type_display }}
+                            </p>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold">R$ {{ order.car.price|floatformat:2 }}</span>
+                                <form method="post" action="{% url 'cars:update_quantity' order.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="number" name="quantity" value="{{ order.quantity }}" min="1" 
+                                           class="form-control form-control-sm" style="width: 60px;" 
+                                           onchange="this.form.submit()">
+                                </form>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-primary">Subtotal: R$ {{ order.total_price|floatformat:2 }}</span>
+                                <a href="{% url 'cars:remove_from_cart' order.id %}" 
+                                   class="btn btn-outline-danger btn-sm"
+                                   onclick="return confirm('Tem certeza que deseja remover este item?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <a href="{% url 'cars:car_list' %}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-left"></i> Continuar Comprando
+                </a>
+            </div>
+            <div class="col-md-6">
+                <div class="bg-light p-3 rounded">
+                    <h4 class="mb-2">Resumo do Pedido</h4>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Itens ({{ items_count }}):</span>
+                        <span>R$ {{ total|floatformat:2 }}</span>
+                    </div>
+                    <hr>
+                    <h3 class="text-primary">Total: R$ {{ total|floatformat:2 }}</h3>
+                    <a href="{% url 'cars:checkout' %}" class="btn btn-primary btn-lg mt-2 w-100">
+                        <i class="bi bi-credit-card"></i> Finalizar Compra
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para desktop */
+    .table th {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .img-thumbnail {
+        object-fit: cover;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        opacity: 1;
+    }
+    
+    /* Estilos para mobile */
+    @media (max-width: 767.98px) {
+        .card {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .card-title {
+            font-size: 1rem;
+            line-height: 1.2;
+        }
+        .card-text {
+            font-size: 0.8rem;
+        }
+        .form-control-sm {
+            height: calc(1.5em + 0.5rem);
+            padding: 0.25rem 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+<script>
+// Confirmação antes de remover item
+document.querySelectorAll('.btn-outline-danger').forEach(button => {
+    button.addEventListener('click', function(e) {
+        if (!confirm('Tem certeza que deseja remover este item do carrinho?')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}
