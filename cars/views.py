@@ -182,3 +182,4 @@ def checkout(request):
     
     messages.success(request, "Compra realizada com sucesso!")
     return redirect('core:profile')
+

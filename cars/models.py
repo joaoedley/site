@@ -42,7 +42,7 @@ class Car(models.Model):
 
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    car = models.ForeignKey(Car, on_delete=models.CASCADE)
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='cars_orders')
     quantity = models.PositiveIntegerField(default=1)
     ordered_date = models.DateTimeField(auto_now_add=True)
     completed = models.BooleanField(default=False)
@@ -52,3 +52,5 @@ class Order(models.Model):
 
     def total_price(self):
         return self.quantity * self.car.price
+    
+

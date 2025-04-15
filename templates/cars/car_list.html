@@ -18,6 +18,7 @@
                         <strong>Transmissão:</strong> {{ car.get_transmission_display }}
                     </p>
                     <a href="{% url 'cars:car_detail' car.pk %}" class="btn btn-primary">Ver Detalhes</a>
+                    <a href="{% url 'cars:add_to_cart' car.id %}" class="btn btn-outline-success">Adicionar ao Carrinho</a>
                 </div>
             </div>
         </div>

@@ -5,14 +5,24 @@ from ckeditor.fields import RichTextField
 from django.utils import timezone
 
 
+def user_profile_picture_path(instance, filename):
+    # Salva a imagem em: media/profile_pictures/user_<id>/<filename>
+    return f'profile_pictures/user_{instance.user.id}/{filename}'
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    phone = models.CharField(max_length=20, blank=True)
-    address = models.TextField(blank=True)
-    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True)
-
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    profile_picture = models.ImageField(
+        upload_to=user_profile_picture_path,
+        default='profile_pictures/default_profile.png',
+        blank=True
+    )
+    
     def __str__(self):
-        return self.user.username
+        return f"Perfil de {self.user.username}"
+    
+
 
 class SiteConfig(models.Model):
     site_name = models.CharField(max_length=100)
@@ -104,3 +114,26 @@ class Contato(models.Model):
 
     def __str__(self):
         return f"{self.assunto} - {self.nome}"
+    
+
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    car = models.ForeignKey('cars.Car', on_delete=models.CASCADE, related_name='core_orders')
+    ordered_date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pendente'),
+        ('completed', 'Completo'),
+        ('cancelled', 'Cancelado'),
+    ], default='pending')
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    # Adicione outros campos necessários para pedidos
+    
+    class Meta:
+        ordering = ['-ordered_date']
+        verbose_name = 'Pedido'
+        verbose_name_plural = 'Pedidos'
+
+    def __str__(self):
+        return f"Pedido #{self.id} - {self.user.username}"

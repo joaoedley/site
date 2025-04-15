@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.generic import TemplateView
-from core.models import AboutPage, TeamMember
+from core.models import AboutPage, TeamMember, Order  # Importe Order de models.py
 from django.apps import apps
 from cars.models import Car, Category
 from core.models import SiteConfig, Banner
@@ -11,6 +11,8 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.views.generic import FormView
 from django.shortcuts import redirect
+from .forms import UserProfileForm, UserForm
+from .models import UserProfile
 
 
 class HomeView(TemplateView):
@@ -22,7 +24,7 @@ class HomeView(TemplateView):
         context['featured_cars'] = Car.objects.filter(available=True)[:6]
         context['categories'] = Category.objects.all()
         context['site_config'] = SiteConfig.objects.first()
-        context['contato_form'] = ContatoForm()  # Adiciona o formulário ao contexto
+        context['contato_form'] = ContatoForm()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -32,7 +34,6 @@ class HomeView(TemplateView):
             messages.success(request, 'Mensagem enviada com sucesso! Entraremos em contato em breve.')
             return redirect('home')
         
-        # Se o formulário for inválido, recarrega a página com os erros
         context = self.get_context_data()
         context['contato_form'] = contato_form
         return self.render_to_response(context)
@@ -57,8 +58,38 @@ class AboutView(TemplateView):
 
 @login_required
 def profile_view(request):
-    return render(request, 'core/profile.html')
+    # Cria o UserProfile se não existir
+    try:
+        user_profile = request.user.userprofile
+    except UserProfile.DoesNotExist:
+        user_profile = UserProfile.objects.create(user=request.user)
+        messages.info(request, "Perfil criado com sucesso!")
 
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user)
+        profile_form = UserProfileForm(
+            request.POST, 
+            request.FILES, 
+            instance=user_profile  # Usa o user_profile que garantimos que existe
+        )
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Perfil atualizado com sucesso!')
+            return redirect('profile')
+    else:
+        user_form = UserForm(instance=request.user)
+        profile_form = UserProfileForm(instance=user_profile)
+    
+    orders = Order.objects.filter(user=request.user).order_by('-ordered_date')
+    
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'orders': orders
+    }
+    return render(request, 'core/profile.html', context)
 
 @staff_member_required
 def custom_admin_view(request):

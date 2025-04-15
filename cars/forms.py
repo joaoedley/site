@@ -25,3 +25,6 @@ class SearchForm(forms.Form):
         queryset=Category.objects.all(),
         empty_label='Todas categorias'
     )
+
+
+
