@@ -6,7 +6,7 @@ from django.utils import timezone
 
 
 def user_profile_picture_path(instance, filename):
-    # Salva a imagem em: media/profile_pictures/user_<id>/<filename>
+    
     return f'profile_pictures/user_{instance.user.id}/{filename}'
 
 class UserProfile(models.Model):
