@@ -111,9 +111,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'account_signup' %}">Registrar</a>
                         </li>
-                        <button id="installButton" class="btn btn-primary" hidden>
-                            <i class="bi bi-download"></i> Instalar App
-                        </button>
+                        
                     {% endif %}
                 </ul>
             </div>
@@ -132,7 +130,9 @@
         {% endif %}
         {% block content %}{% endblock %}
     </main>
-    
+    <button id="installButton" class="btn btn-primary" hidden>
+        <i class="bi bi-download"></i> Instalar App
+    </button>
     
     <script>
     // Detecção de capacidade PWA e botão de instalação
