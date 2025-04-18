@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Verificação PWA</h2>
+    <ul class="list-group mt-3">
+        <li class="list-group-item" id="manifest-status">Manifest.json: Verificando...</li>
+        <li class="list-group-item" id="serviceworker-status">Service Worker: Verificando...</li>
+        <li class="list-group-item" id="https-status">HTTPS: Verificando...</li>
+        <li class="list-group-item" id="install-status">Instalação: Verificando...</li>
+    </ul>
+</div>
+
+<script>
+// Verificação técnica
+document.addEventListener('DOMContentLoaded', () => {
+    // Verifica manifest
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        document.getElementById('manifest-status').textContent = 'Manifest.json: ✔️ (Já instalado)';
+    } else if (document.querySelector('link[rel="manifest"]')) {
+        document.getElementById('manifest-status').textContent = 'Manifest.json: ✔️ Configurado';
+    } else {
+        document.getElementById('manifest-status').textContent = 'Manifest.json: ❌ Não encontrado';
+    }
+
+    // Verifica service worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+            if (registrations.length > 0) {
+                document.getElementById('serviceworker-status').textContent = 
+                    'Service Worker: ✔️ Registrado (' + registrations.length + ')';
+            } else {
+                document.getElementById('serviceworker-status').textContent = 
+                    'Service Worker: ❌ Não registrado';
+            }
+        });
+    } else {
+        document.getElementById('serviceworker-status').textContent = 
+            'Service Worker: ❌ Não suportado no navegador';
+    }
+
+    // Verifica HTTPS
+    document.getElementById('https-status').textContent = 
+        location.protocol === 'https:' ? 
+        'HTTPS: ✔️ Seguro' : 
+        'HTTPS: ⚠️ Necessário para instalação (atual: ' + location.protocol + ')';
+
+    // Verifica capacidade de instalação
+    const installStatus = document.getElementById('install-status');
+    window.addEventListener('beforeinstallprompt', () => {
+        installStatus.textContent = 'Instalação: ✔️ Disponível';
+    });
+    
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        installStatus.textContent = 'Instalação: ✔️ Já instalado';
+    } else {
+        installStatus.textContent = 'Instalação: ❌ Verifique os requisitos acima';
+    }
+});
+</script>
+{% endblock %}

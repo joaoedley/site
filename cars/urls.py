@@ -29,5 +29,6 @@ urlpatterns = [
         content_type='application/json')
     ),
     path('offline/', TemplateView.as_view(template_name='offline.html')),
+    path('pwa-check/', TemplateView.as_view(template_name='pwa_check.html')),
     
 ]

@@ -135,32 +135,36 @@
     </button>
     
     <script>
-    // Detecção de capacidade PWA e botão de instalação
-    let deferredPrompt;
-    const installButton = document.getElementById('installButton');
-    
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installButton.hidden = false;
-    });
-    
-    installButton.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          installButton.hidden = true;
-        }
-        deferredPrompt = null;
-      }
-    });
-    
-    // Verifica se já está instalado
-    window.addEventListener('appinstalled', () => {
-      installButton.hidden = true;
-    });
-    </script>
+        // Controle de instalação do PWA
+        let deferredPrompt;
+        const installButton = document.createElement('button');
+        installButton.id = 'installButton';
+        installButton.className = 'btn btn-primary d-none';
+        installButton.innerHTML = '<i class="bi bi-download"></i> Instalar App';
+        
+        document.body.appendChild(installButton);
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+          installButton.classList.remove('d-none');
+          
+          installButton.addEventListener('click', async () => {
+            installButton.classList.add('d-none');
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+              console.log('Usuário aceitou a instalação');
+            }
+            deferredPrompt = null;
+          });
+        });
+        
+        window.addEventListener('appinstalled', () => {
+          installButton.classList.add('d-none');
+          console.log('PWA instalado com sucesso');
+        });
+        </script>
 
     <!-- Footer -->
     <footer class="bg-dark text-white py-4 mt-5">
